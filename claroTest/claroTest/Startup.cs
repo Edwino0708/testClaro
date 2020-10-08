@@ -5,6 +5,10 @@ using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using System.Net.Http;
+using System.Collections.Generic;
+
 
 namespace claroTest
 {
@@ -22,6 +26,8 @@ namespace claroTest
         {
             services.AddControllersWithViews();
             // In production, the Angular files will be served from this directory
+            services.AddTransient<HttpClient>();
+            
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "ClientApp/dist";
