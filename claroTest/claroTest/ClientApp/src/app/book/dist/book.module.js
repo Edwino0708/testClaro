@@ -15,8 +15,11 @@ var form_book_component_1 = require("./form/form-book.component");
 var table_1 = require("@angular/material/table");
 var form_field_1 = require("@angular/material/form-field");
 var input_1 = require("@angular/material/input");
+var material_1 = require("@angular/material");
+var forms_1 = require("@angular/forms");
+var book_service_1 = require("./api/book.service");
 var routes = [
-    { path: 'form/?id', component: form_book_component_1.FormBookComponent },
+    { path: 'form/:id', component: form_book_component_1.FormBookComponent },
     { path: 'list', component: list_book_component_1.ListBookComponent }
 ];
 var BookModule = /** @class */ (function () {
@@ -28,12 +31,20 @@ var BookModule = /** @class */ (function () {
                 form_book_component_1.FormBookComponent, list_book_component_1.ListBookComponent
             ],
             imports: [
+                forms_1.FormsModule,
+                forms_1.ReactiveFormsModule,
                 common_1.CommonModule,
                 router_1.RouterModule.forChild(routes),
                 table_1.MatTableModule,
                 form_field_1.MatFormFieldModule,
-                input_1.MatInputModule
-            ]
+                input_1.MatInputModule,
+                material_1.MatButtonModule,
+                material_1.MatMenuModule,
+                material_1.MatIconModule,
+                material_1.MatProgressSpinnerModule,
+                material_1.MatProgressBarModule
+            ],
+            providers: [book_service_1.BookService]
         })
     ], BookModule);
     return BookModule;

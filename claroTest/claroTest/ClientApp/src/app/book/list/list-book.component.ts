@@ -1,25 +1,16 @@
-import { Component, OnInit } from '@angular/core';
-import {MatTableDataSource} from '@angular/material/table';
+import { DataSource } from '@angular/cdk/table';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { BehaviorSubject, fromEvent, Observable, Subject } from 'rxjs';
+import { BookService } from '../api/book.service';
+import { book } from '../book.model';
+import {
+  debounceTime,
+  distinctUntilChanged,
+  tap,
+  takeUntil,
+} from "rxjs/operators";
 
-export interface PeriodicElement {
-  name: string;
-  position: number;
-  weight: number;
-  symbol: string;
-}
-
-const ELEMENT_DATA: PeriodicElement[] = [
-  {position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H'},
-  {position: 2, name: 'Helium', weight: 4.0026, symbol: 'He'},
-  {position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li'},
-  {position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be'},
-  {position: 5, name: 'Boron', weight: 10.811, symbol: 'B'},
-  {position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C'},
-  {position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N'},
-  {position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O'},
-  {position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F'},
-  {position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne'},
-];
+import Swal from 'sweetalert2'
 
 @Component({
   selector: 'list-book',
@@ -27,18 +18,96 @@ const ELEMENT_DATA: PeriodicElement[] = [
   styleUrls: ['./list-book.component.scss']
 })
 export class ListBookComponent implements OnInit {
+  loading:boolean = false;
+  dataSource : BooksDataSource | null;
 
-  constructor() { }
+  displayedColumns: string[] = ['id','title', 'description', 'pageCount', 'excerpt','publishDate','buttons'];
+  private _unsubscribeAll: Subject<any>;
 
-  ngOnInit() {
+  @ViewChild("filter", { static: true })
+  filter: ElementRef;
+
+  constructor(private _bookService:BookService) { 
+    this._unsubscribeAll = new Subject();
   }
 
-  displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
-  dataSource = new MatTableDataSource(ELEMENT_DATA);
+  ngOnInit() {
+    this.dataSource = new BooksDataSource(this._bookService);
+    this.dataSource.loadBooks();
 
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.dataSource.filter = filterValue.trim().toLowerCase();
+    fromEvent(this.filter.nativeElement, "keyup")
+        .pipe(
+            takeUntil(this._unsubscribeAll),
+            debounceTime(150),
+            distinctUntilChanged()
+        )
+        .subscribe(() => {
+            if (!this.dataSource) {
+                return;
+            }
+            this.loadPage();
+        });
+  }
+
+  loadPage() {
+    this.dataSource.loadBooks(
+        this.filter.nativeElement.value,
+    );
+  }
+
+  deteteBook(id){
+    try{
+      this._bookService.deleteBookById(id).then(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Bien....',
+          text: 'El libro fue elimininado!'
+        }).then(() => this.loadPage())
+      })
+    }catch{
+      Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: 'Something went wrong!'
+      })
+    }
+  }
+}
+
+export class BooksDataSource extends DataSource<book> {
+  private _booksSubject = new BehaviorSubject<book[]>([]);
+  private _loadingSubject = new BehaviorSubject<boolean>(false);
+
+  public loading$ = this._loadingSubject.asObservable();
+
+  constructor(private _bookService: BookService) {
+      super();
+  }
+
+  connect(): Observable<any[] | readonly any[]> {
+      return this._booksSubject.asObservable();
+  }
+
+  disconnect(): void {
+      this._booksSubject.complete();
+      this._loadingSubject.complete();
+  }
+
+  loadBooks(
+      filter = "",
+  ): void {
+      this._loadingSubject.next(true);
+      this._bookService
+          .getBooks(filter)
+          .then((res) => {
+              this._booksSubject.next(res);
+              this._loadingSubject.next(false);
+          })
+          .catch((err) => {
+              console.log(err);
+              this._booksSubject.next([]);
+              this._loadingSubject.next(false);
+          });
   }
 
 }

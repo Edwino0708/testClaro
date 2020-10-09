@@ -1,11 +1,76 @@
 
-
 <div>
+  <div class="title">
+    <h2>{{title}} un libro</h2>
+  </div>
 
-    <div class="row">
+    <form [formGroup]="bookForm" (submit)='submitForm()'>
+      <div class="col">
+        <div class="row">
+          <mat-form-field appearance="outline" class="col-12 mt-3 mx-auto">
+            <mat-label>Titulo</mat-label>
+            <input type="text" matInput formControlName="title"/>
+            <mat-error 
+              *ngIf="bookForm.get('title').hasError('required')">
+              Titulo es <strong>requerido</strong>
+            </mat-error>
+          </mat-form-field>
+        </div>
+       
+        <div class="row">
+          <mat-form-field appearance="outline" class="col-12 mt-3 mx-auto">
+            <mat-label>Descripción</mat-label>
+            <input type="text" matInput formControlName="description"/>
+            <mat-error 
+              *ngIf="bookForm.get('description').hasError('required')">
+              Descripción es <strong>requerido</strong>
+            </mat-error>
+          </mat-form-field>
+        </div>
 
+        <div class="row">
+          <mat-form-field appearance="outline" class="col-12 mt-3 mx-auto">
+            <mat-label>Excepto</mat-label>
+            
+            <textarea matInput 
+              formControlName="excerpt">
+            </textarea>
+            <mat-error 
+              *ngIf="bookForm.get('excerpt').hasError('required')">
+              Excepto es <strong>requerido</strong>
+            </mat-error>
+          </mat-form-field>
+        </div>
         
+        <div class="row">
+          <mat-form-field appearance="outline" class="col-6 mt-3 mx-auto">
+            <mat-label>Recuento de páginas</mat-label>
+            <input type="number" min="0" matInput formControlName="pageCount"/>
+            <mat-error 
+              *ngIf="bookForm.get('pageCount').hasError('required')">
+              Recuento de páginas es <strong>requerido</strong>
+            </mat-error>
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline" class="col-6 mt-3 mx-auto">
+            <mat-label>Dia de publicación</mat-label>
+            <input type="date" matInput formControlName="publishDate"/>
+            <mat-error 
+              *ngIf="bookForm.get('publishDate').hasError('required')">
+              Dia de publicación es <strong>requerido</strong>
+            </mat-error>
+          </mat-form-field>
+        </div>
+        <div>
 
-    </div>
+        <div *ngIf="pageType == 'new'; else update">
+          <button type="submit" class="btn btn-primary">Crear</button>
+        </div>
+        <ng-template #update>
+          <button type="submit" class="mx-auto btn btn-warning">Editar</button>
+        </ng-template>
+        </div>
 
+      </div>
+  </form>
 </div>

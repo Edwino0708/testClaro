@@ -4,6 +4,32 @@ export interface book{
     title?:string;
     description?:string;
     pageCount?:number;
-    except?:string;
+    excerpt?:string;
     publishDate?:Date;
+}
+
+
+export class Book {
+    id: number = 0;
+    title: string = "";
+    description: string = "";
+    excerpt: string = "";
+    pageCount: number = 0;
+    publishDate: Date = null;
+
+    constructor(
+        id: number = 0,
+        title: string = "",
+        description: string = "",
+        excerpt: string = "",
+        pageCount: number = 0,
+        publishDate: Date = null,
+    ) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.excerpt = excerpt;
+        this.pageCount = pageCount;
+        this.publishDate = publishDate;
+    }
 }

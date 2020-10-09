@@ -52,7 +52,7 @@ namespace claroTest.Controllers
         }
 
         [HttpGet("all")]
-        public async Task<IActionResult> GetBook()
+        public async Task<IActionResult> GetBook(string filter)
         {
             try
             {   _httpClient.DefaultRequestHeaders.Accept.Add(

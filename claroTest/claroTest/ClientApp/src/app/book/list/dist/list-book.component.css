@@ -1,9 +1,23 @@
 /* Structure */
+.header {
+  margin: 20px 10px;
+}
+.header h2 {
+  text-align: center;
+}
+.header .mat-form-field {
+  font-size: 14px;
+  width: 30vw;
+}
+.header button {
+  float: right;
+}
+
 table {
   width: 100%;
 }
 
-.mat-form-field {
-  font-size: 14px;
-  width: 100%;
+.mat-column-excerpt {
+  width: 20vw;
+  height: 5vh;
 }

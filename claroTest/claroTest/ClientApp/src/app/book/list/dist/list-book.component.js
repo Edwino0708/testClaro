@@ -1,4 +1,17 @@
 "use strict";
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
     var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
     if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
@@ -6,32 +19,57 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
     return c > 3 && r && Object.defineProperty(target, key, r), r;
 };
 exports.__esModule = true;
-exports.ListBookComponent = void 0;
+exports.BooksDataSource = exports.ListBookComponent = void 0;
+var table_1 = require("@angular/cdk/table");
 var core_1 = require("@angular/core");
-var table_1 = require("@angular/material/table");
-var ELEMENT_DATA = [
-    { position: 1, name: 'Hydrogen', weight: 1.0079, symbol: 'H' },
-    { position: 2, name: 'Helium', weight: 4.0026, symbol: 'He' },
-    { position: 3, name: 'Lithium', weight: 6.941, symbol: 'Li' },
-    { position: 4, name: 'Beryllium', weight: 9.0122, symbol: 'Be' },
-    { position: 5, name: 'Boron', weight: 10.811, symbol: 'B' },
-    { position: 6, name: 'Carbon', weight: 12.0107, symbol: 'C' },
-    { position: 7, name: 'Nitrogen', weight: 14.0067, symbol: 'N' },
-    { position: 8, name: 'Oxygen', weight: 15.9994, symbol: 'O' },
-    { position: 9, name: 'Fluorine', weight: 18.9984, symbol: 'F' },
-    { position: 10, name: 'Neon', weight: 20.1797, symbol: 'Ne' },
-];
+var rxjs_1 = require("rxjs");
+var operators_1 = require("rxjs/operators");
+var sweetalert2_1 = require("sweetalert2");
 var ListBookComponent = /** @class */ (function () {
-    function ListBookComponent() {
-        this.displayedColumns = ['position', 'name', 'weight', 'symbol'];
-        this.dataSource = new table_1.MatTableDataSource(ELEMENT_DATA);
+    function ListBookComponent(_bookService) {
+        this._bookService = _bookService;
+        this.loading = false;
+        this.displayedColumns = ['id', 'title', 'description', 'pageCount', 'excerpt', 'publishDate', 'buttons'];
+        this._unsubscribeAll = new rxjs_1.Subject();
     }
     ListBookComponent.prototype.ngOnInit = function () {
+        var _this = this;
+        this.dataSource = new BooksDataSource(this._bookService);
+        this.dataSource.loadBooks();
+        rxjs_1.fromEvent(this.filter.nativeElement, "keyup")
+            .pipe(operators_1.takeUntil(this._unsubscribeAll), operators_1.debounceTime(150), operators_1.distinctUntilChanged())
+            .subscribe(function () {
+            if (!_this.dataSource) {
+                return;
+            }
+            _this.loadPage();
+        });
     };
-    ListBookComponent.prototype.applyFilter = function (event) {
-        var filterValue = event.target.value;
-        this.dataSource.filter = filterValue.trim().toLowerCase();
+    ListBookComponent.prototype.loadPage = function () {
+        this.dataSource.loadBooks(this.filter.nativeElement.value);
     };
+    ListBookComponent.prototype.deteteBook = function (id) {
+        var _this = this;
+        try {
+            this._bookService.deleteBookById(id).then(function () {
+                sweetalert2_1["default"].fire({
+                    icon: 'success',
+                    title: 'Bien....',
+                    text: 'El libro fue elimininado!'
+                }).then(function () { return _this.loadPage(); });
+            });
+        }
+        catch (_a) {
+            sweetalert2_1["default"].fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Something went wrong!'
+            });
+        }
+    };
+    __decorate([
+        core_1.ViewChild("filter", { static: true })
+    ], ListBookComponent.prototype, "filter");
     ListBookComponent = __decorate([
         core_1.Component({
             selector: 'list-book',
@@ -42,3 +80,38 @@ var ListBookComponent = /** @class */ (function () {
     return ListBookComponent;
 }());
 exports.ListBookComponent = ListBookComponent;
+var BooksDataSource = /** @class */ (function (_super) {
+    __extends(BooksDataSource, _super);
+    function BooksDataSource(_bookService) {
+        var _this = _super.call(this) || this;
+        _this._bookService = _bookService;
+        _this._booksSubject = new rxjs_1.BehaviorSubject([]);
+        _this._loadingSubject = new rxjs_1.BehaviorSubject(false);
+        _this.loading$ = _this._loadingSubject.asObservable();
+        return _this;
+    }
+    BooksDataSource.prototype.connect = function () {
+        return this._booksSubject.asObservable();
+    };
+    BooksDataSource.prototype.disconnect = function () {
+        this._booksSubject.complete();
+        this._loadingSubject.complete();
+    };
+    BooksDataSource.prototype.loadBooks = function (filter) {
+        var _this = this;
+        if (filter === void 0) { filter = ""; }
+        this._loadingSubject.next(true);
+        this._bookService
+            .getBooks(filter)
+            .then(function (res) {
+            _this._booksSubject.next(res);
+            _this._loadingSubject.next(false);
+        })["catch"](function (err) {
+            console.log(err);
+            _this._booksSubject.next([]);
+            _this._loadingSubject.next(false);
+        });
+    };
+    return BooksDataSource;
+}(table_1.DataSource));
+exports.BooksDataSource = BooksDataSource;

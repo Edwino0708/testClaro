@@ -9,7 +9,6 @@ exports.__esModule = true;
 exports.AppModule = void 0;
 var platform_browser_1 = require("@angular/platform-browser");
 var core_1 = require("@angular/core");
-var forms_1 = require("@angular/forms");
 var http_1 = require("@angular/common/http");
 var router_1 = require("@angular/router");
 var app_component_1 = require("./app.component");
@@ -33,9 +32,8 @@ var AppModule = /** @class */ (function () {
             imports: [
                 platform_browser_1.BrowserModule.withServerTransition({ appId: 'ng-cli-universal' }),
                 http_1.HttpClientModule,
-                forms_1.FormsModule,
                 router_1.RouterModule.forRoot(routes),
-                animations_1.BrowserAnimationsModule
+                animations_1.BrowserAnimationsModule,
             ],
             providers: [],
             bootstrap: [app_component_1.AppComponent]

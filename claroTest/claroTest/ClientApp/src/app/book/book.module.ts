@@ -6,10 +6,13 @@ import { FormBookComponent } from './form/form-book.component';
 import {MatTableModule} from '@angular/material/table'; 
 import {MatFormFieldModule} from '@angular/material/form-field'; 
 import {MatInputModule} from '@angular/material/input'; 
+import {MatButtonModule, MatIconModule, MatMenuModule, MatProgressBarModule, MatProgressSpinnerModule} from '@angular/material';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { BookService } from './api/book.service';
 
 
 const routes: Routes = [
-  { path: 'form/?id', component: FormBookComponent },
+  { path: 'form/:id', component: FormBookComponent },
   { path: 'list', component: ListBookComponent}
  ];
 
@@ -18,11 +21,19 @@ const routes: Routes = [
     FormBookComponent,ListBookComponent
   ],
   imports: [
+    FormsModule,
+    ReactiveFormsModule,
     CommonModule,
     RouterModule.forChild(routes),
     MatTableModule,
     MatFormFieldModule,
-    MatInputModule
-  ]
+    MatInputModule,
+    MatButtonModule,
+    MatMenuModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    MatProgressBarModule
+  ],
+  providers : [BookService]
 })
 export class BookModule { }
